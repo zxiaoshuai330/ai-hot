@@ -37,6 +37,7 @@ def home():
             avg = (last1 + last2) / 2
             diff = abs(last1 - last2)
 
+            # 波動
             if diff > 80:
                 risk = "高波動（節奏不穩）"
             elif diff > 30:
@@ -44,27 +45,24 @@ def home():
             else:
                 risk = "穩定節奏"
 
+            # 🎯 操作建議（你指定的三種）
             if current > avg * 1.3:
                 status = "進入尾段醞釀"
-                action = "建議低倍提前卡位"
+                action = "建議低本測試"
                 range_text = f"觀察區：約 {int(avg*0.8)}～{int(avg*1.2)} 轉"
             elif current < avg * 0.7:
                 status = "剛結束釋放"
-                action = "暫不建議進場"
+                action = "不建議進場"
                 range_text = f"建議等待累積至 {int(avg)} 轉以上"
             else:
                 status = "訊號累積中"
-                action = "可小注測試"
+                action = "購買免費遊戲"
                 range_text = f"測試區：約 {int(avg*0.6)}～{int(avg*0.9)} 轉"
 
             confidence = random.randint(80, 96)
             signal_chance = random.randint(60, 95)
 
             signal_text = f"✅ 成功捕捉熱點訊號（機率 {signal_chance}%）" if signal_chance > 75 else f"⚠️ 訊號偏弱（{signal_chance}%）"
-
-            base_hits = ["48轉","63轉","72轉","91轉","105轉","58轉","83轉"]
-            hit_count = random.randint(1, 5)
-            hits = "<br>".join([f"🎯 {x} → 命中" for x in random.sample(base_hits, hit_count)])
 
             result = f"""
             <div id="cards">
@@ -92,10 +90,6 @@ def home():
 
                 <div class="card step">
                     🤖 AI信心指數：{confidence}%
-                </div>
-
-                <div class="card step">
-                    📈 近期命中案例：<br>{hits}
                 </div>
 
                 <div class="card step small">
