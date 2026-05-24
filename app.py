@@ -21,45 +21,49 @@ def home():
             avg = (last1 + last2) / 2
             diff = abs(last1 - last2)
 
+            # 風險判斷
             if diff > 80:
-                risk = "高風險"
+                risk = "高風險波動"
             elif diff > 30:
-                risk = "中風險"
+                risk = "中等波動"
             else:
-                risk = "低風險"
+                risk = "穩定節奏"
 
+            # 節奏判斷
             if current > avg * 1.3:
-                status = "觸發醞釀尾段"
-                base_score = 75
+                status = "進入觸發醞釀尾段"
+                action = "建議低倍卡位觀察"
+                range_text = f"建議觀察區間：約 {int(avg*0.8)}～{int(avg*1.2)} 轉"
             elif current < avg * 0.7:
-                status = "節奏重建中"
-                base_score = 40
+                status = "剛結束釋放期"
+                action = "暫不建議進場"
+                range_text = f"建議等待下一輪累積（約 {int(avg)} 轉以上）"
             else:
-                status = "訊號累積中"
-                base_score = 60
-
-            score = base_score + (today - 100) * 0.2
-            score += random.randint(-5, 5)
-            score = max(0, min(100, int(score)))
-
-            if score > 70:
-                tag = "🔥 熱點區"
-                action = "建議提前卡位"
-            elif score > 50:
-                tag = "⚡ 過渡區"
+                status = "訊號累積過渡期"
                 action = "可小注測試"
-            else:
-                tag = "❄️ 冷卻區"
-                action = "低倍觀察"
+                range_text = f"建議測試區間：約 {int(avg*0.6)}～{int(avg*0.9)} 轉"
 
-            confidence = random.randint(75, 96)
+            confidence = random.randint(78, 96)
 
             result = f"""
             <div id="cards">
-                <div class="card">🤖 AI評分：{score}</div>
-                <div class="card">📊 節奏：{status}<br>🏷 狀態：{tag}<br>⚠️ 風險：{risk}</div>
-                <div class="card highlight">🎯 建議：{action}</div>
-                <div class="card">📈 信心指數：{confidence}%</div>
+
+                <div class="card">
+                    📊 節奏分析：{status}<br>
+                    ⚠️ 波動判定：{risk}
+                </div>
+
+                <div class="card highlight">
+                    🎯 操作建議：{action}
+                </div>
+
+                <div class="card">
+                    ⏱ 參考區間：{range_text}
+                </div>
+
+                <div class="card">
+                    🤖 AI信心指數：{confidence}%
+                </div>
 
                 <div class="card small">
                     ⚠️ 熱點訊號存在時，通常不會維持太久<br>
@@ -69,6 +73,7 @@ def home():
                 <div class="card small">
                     ※ 本系統為AI模型推估，結果僅供參考
                 </div>
+
             </div>
             """
 
@@ -90,7 +95,8 @@ def home():
 
         .title {{
             color:orange;
-            font-size:24px;
+            font-size:26px;
+            font-weight:bold;
         }}
 
         .subtitle {{
@@ -178,8 +184,8 @@ def home():
     </style>
 
     <script>
-        function startAnalysis(form) {{
-            event.preventDefault();
+        function startAnalysis(form, e) {{
+            e.preventDefault();
 
             document.getElementById("loading").style.display = "block";
 
@@ -204,6 +210,13 @@ def home():
                 form.submit();
             }}, 4000);
         }}
+
+        // 分析完成震動
+        window.onload = function() {{
+            if (navigator.vibrate) {{
+                navigator.vibrate([100, 50, 100]);
+            }}
+        }}
     </script>
 
     </head>
@@ -213,7 +226,7 @@ def home():
         <div class="title">⚡ 熱點雷達</div>
         <div class="subtitle">AI節奏分析｜即時捕捉波動訊號</div>
 
-        <form method="post" onsubmit="startAnalysis(this)">
+        <form method="post" onsubmit="startAnalysis(this, event)">
             <input name="today" placeholder="今日得分率">
             <input name="current" placeholder="未開轉數">
             <input name="last1" placeholder="上次轉數">
