@@ -21,56 +21,58 @@ def home():
             avg = (last1 + last2) / 2
             diff = abs(last1 - last2)
 
-            # 風險判斷
+            # 風險
             if diff > 80:
-                risk = "高風險波動"
+                risk = "高波動（節奏不穩）"
             elif diff > 30:
-                risk = "中等波動"
+                risk = "中波動"
             else:
                 risk = "穩定節奏"
 
-            # 節奏判斷
+            # 節奏 + 建議
             if current > avg * 1.3:
-                status = "進入觸發醞釀尾段"
-                action = "建議低倍卡位觀察"
-                range_text = f"建議觀察區間：約 {int(avg*0.8)}～{int(avg*1.2)} 轉"
+                status = "進入尾段醞釀"
+                action = "建議低倍提前卡位"
+                range_text = f"觀察區：約 {int(avg*0.8)}～{int(avg*1.2)} 轉"
             elif current < avg * 0.7:
-                status = "剛結束釋放期"
+                status = "剛結束釋放"
                 action = "暫不建議進場"
-                range_text = f"建議等待下一輪累積（約 {int(avg)} 轉以上）"
+                range_text = f"建議等待累積至 {int(avg)} 轉以上"
             else:
-                status = "訊號累積過渡期"
+                status = "訊號累積中"
                 action = "可小注測試"
-                range_text = f"建議測試區間：約 {int(avg*0.6)}～{int(avg*0.9)} 轉"
+                range_text = f"測試區：約 {int(avg*0.6)}～{int(avg*0.9)} 轉"
 
-            confidence = random.randint(78, 96)
+            confidence = random.randint(80, 96)
 
             result = f"""
             <div id="cards">
 
-                <div class="card">
-                    📊 節奏分析：{status}<br>
-                    ⚠️ 波動判定：{risk}
+                <div class="card step">📊 正在重建節奏模型...</div>
+
+                <div class="card step">
+                    🔍 節奏判定：{status}<br>
+                    ⚠️ 波動狀態：{risk}
                 </div>
 
-                <div class="card highlight">
+                <div class="card step highlight">
                     🎯 操作建議：{action}
                 </div>
 
-                <div class="card">
+                <div class="card step">
                     ⏱ 參考區間：{range_text}
                 </div>
 
-                <div class="card">
+                <div class="card step">
                     🤖 AI信心指數：{confidence}%
                 </div>
 
-                <div class="card small">
-                    ⚠️ 熱點訊號存在時，通常不會維持太久<br>
-                    💡 暫不建議重壓，可低倍觀察
+                <div class="card step small">
+                    ⚠️ 熱點訊號存在時通常不會維持太久<br>
+                    💡 建議低倍觀察，避免重壓
                 </div>
 
-                <div class="card small">
+                <div class="card step small">
                     ※ 本系統為AI模型推估，結果僅供參考
                 </div>
 
@@ -132,16 +134,12 @@ def home():
             padding:15px;
             border-radius:15px;
             opacity:0;
-            transform:translateY(20px);
-            animation:fadeUp 0.6s forwards;
+            transform:translateY(30px);
         }}
 
-        .card:nth-child(1) {{animation-delay:0.3s}}
-        .card:nth-child(2) {{animation-delay:0.8s}}
-        .card:nth-child(3) {{animation-delay:1.3s}}
-        .card:nth-child(4) {{animation-delay:1.8s}}
-        .card:nth-child(5) {{animation-delay:2.3s}}
-        .card:nth-child(6) {{animation-delay:2.8s}}
+        .show {{
+            animation:fadeUp 0.5s forwards;
+        }}
 
         @keyframes fadeUp {{
             to {{
@@ -174,7 +172,7 @@ def home():
             height:100%;
             width:0%;
             background:orange;
-            animation:load 4s linear forwards;
+            animation:load 5s linear forwards;
         }}
 
         @keyframes load {{
@@ -190,10 +188,10 @@ def home():
             document.getElementById("loading").style.display = "block";
 
             let texts = [
-                "🔍 掃描近期節奏...",
-                "📊 建立波動模型...",
-                "🧠 AI計算中...",
-                "⚡ 捕捉熱點訊號..."
+                "🔍 掃描資料...",
+                "📊 建立節奏模型...",
+                "🧠 深度分析中...",
+                "⚡ 捕捉關鍵訊號..."
             ];
 
             let i = 0;
@@ -204,18 +202,30 @@ def home():
                 }} else {{
                     clearInterval(interval);
                 }}
-            }}, 1000);
+            }}, 1200);
 
             setTimeout(() => {{
                 form.submit();
-            }}, 4000);
+            }}, 5000);
         }}
 
-        // 分析完成震動
+        // 分段顯示（像APP）
         window.onload = function() {{
-            if (navigator.vibrate) {{
-                navigator.vibrate([100, 50, 100]);
-            }}
+            let steps = document.querySelectorAll(".step");
+
+            steps.forEach((el, i) => {{
+                setTimeout(() => {{
+                    el.classList.add("show");
+
+                    // 最後一個震動
+                    if (i === steps.length - 1) {{
+                        if (navigator.vibrate) {{
+                            navigator.vibrate([100, 50, 100]);
+                        }}
+                    }}
+
+                }}, i * 600);
+            }});
         }}
     </script>
 
