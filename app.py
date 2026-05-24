@@ -1,7 +1,6 @@
 from flask import Flask, request
 import random
 import os
-import time
 
 app = Flask(__name__)
 
@@ -39,17 +38,17 @@ def home():
             else:
                 risk = "穩定節奏"
 
-            # 🔥 訊號生成
+            # 🔥 訊號生成（無符號版本）
             def gen_signal():
-                mode = random.choice(["ball", "b"])
+                mode = random.choice(["球", "免"])
                 count = random.randint(1, 2)
 
-                if mode == "ball":
+                if mode == "球":
                     num = random.randint(1, 6)
-                    return f"訊號部分：({count})球 + {{{num}}} 個相同大圖"
+                    return f"訊號：{count}個{mode} + {num}個相同大圖"
                 else:
                     seq = random.choice(["123","234","345","456","567"])
-                    return f"訊號部分：({count})b + [{seq}] 順序大圖"
+                    return f"訊號：{count}個{mode} + {seq}順序大圖"
 
             signal_extra = gen_signal()
 
@@ -58,26 +57,27 @@ def home():
                 status = "進入尾段醞釀"
                 action = "建議低本測試"
                 range_text = f"{int(avg*0.8)}～{int(avg*1.2)} 轉"
+                show_signal = True
 
             elif current < avg * 0.7:
                 status = "剛結束釋放"
                 action = "不建議進場"
                 range_text = f"建議等待累積至 {int(avg)} 轉以上"
+                show_signal = False
 
             else:
                 status = "訊號累積中"
                 action = "購買免費遊戲"
                 range_text = f"{int(avg*0.6)}～{int(avg*0.9)} 轉"
+                show_signal = True
 
             confidence = random.randint(80, 96)
             signal_chance = random.randint(60, 95)
 
             signal_text = f"✅ 成功捕捉熱點訊號（{signal_chance}%）" if signal_chance > 75 else f"⚠️ 訊號偏弱（{signal_chance}%）"
 
-            # 🔥 組結果
-            extra_block = ""
-            if action == "購買免費遊戲":
-                extra_block = f"<br>{signal_extra}"
+            # 🔥 只在指定情況加訊號
+            extra_block = f"<br>{signal_extra}" if show_signal else ""
 
             result = f"""
             <div id="cards">
@@ -101,8 +101,7 @@ def home():
                 </div>
 
                 <div class="card step">
-                    ⏱ 建議區間：{range_text}<br>
-                    {signal_extra}
+                    ⏱ 建議區間：{range_text}
                 </div>
 
                 <div class="card step">
