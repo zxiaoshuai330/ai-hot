@@ -55,7 +55,7 @@ def home():
             confidence = random.randint(75, 96)
 
             result = f"""
-            <div id="cards" style="display:none;">
+            <div id="cards">
                 <div class="card">🤖 AI評分：{score}</div>
                 <div class="card">📊 節奏：{status}<br>🏷 狀態：{tag}<br>⚠️ 風險：{risk}</div>
                 <div class="card highlight">🎯 建議：{action}</div>
@@ -178,7 +178,9 @@ def home():
     </style>
 
     <script>
-        function showLoading() {{
+        function startAnalysis(form) {{
+            event.preventDefault();
+
             document.getElementById("loading").style.display = "block";
 
             let texts = [
@@ -199,7 +201,7 @@ def home():
             }}, 1000);
 
             setTimeout(() => {{
-                document.getElementById("cards").style.display = "block";
+                form.submit();
             }}, 4000);
         }}
     </script>
@@ -211,7 +213,7 @@ def home():
         <div class="title">⚡ 熱點雷達</div>
         <div class="subtitle">AI節奏分析｜即時捕捉波動訊號</div>
 
-        <form method="post" onsubmit="showLoading()">
+        <form method="post" onsubmit="startAnalysis(this)">
             <input name="today" placeholder="今日得分率">
             <input name="current" placeholder="未開轉數">
             <input name="last1" placeholder="上次轉數">
