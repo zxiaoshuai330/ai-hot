@@ -1,6 +1,7 @@
 from flask import Flask, request
 import random
 import os
+import time
 
 app = Flask(__name__)
 
@@ -8,6 +9,11 @@ app = Flask(__name__)
 def home():
     result = ""
     show_result = "none"
+
+    # 🔥 假在線人數（每30分鐘變）
+    seed = int(time.time() // 1800)
+    random.seed(seed)
+    online_users = random.randint(0, 57)
 
     if request.method == "POST":
         show_result = "block"
@@ -21,7 +27,6 @@ def home():
             avg = (last1 + last2) / 2
             diff = abs(last1 - last2)
 
-            # 波動
             if diff > 80:
                 risk = "高波動（節奏不穩）"
             elif diff > 30:
@@ -29,7 +34,6 @@ def home():
             else:
                 risk = "穩定節奏"
 
-            # 節奏
             if current > avg * 1.3:
                 status = "進入尾段醞釀"
                 action = "建議低倍提前卡位"
@@ -44,32 +48,37 @@ def home():
                 range_text = f"測試區：約 {int(avg*0.6)}～{int(avg*0.9)} 轉"
 
             confidence = random.randint(80, 96)
-
-            # 🔥 是否抓到訊號（隨機但合理）
-            signal_chance = random.randint(60, 92)
+            signal_chance = random.randint(60, 95)
 
             if signal_chance > 75:
                 signal_text = f"✅ 成功捕捉熱點訊號（機率 {signal_chance}%）"
             else:
                 signal_text = f"⚠️ 訊號偏弱（目前機率 {signal_chance}%）"
 
-            # 🔥 假命中案例
-            fake_hits = [
-                "🎯 68轉 → 命中",
-                "🎯 102轉 → 命中",
-                "🎯 55轉 → 命中",
-                "🎯 89轉 → 命中"
+            # 🔥 命中案例（隨機1~5筆）
+            base_hits = [
+                "🎯 48轉 → 命中",
+                "🎯 63轉 → 命中",
+                "🎯 72轉 → 命中",
+                "🎯 91轉 → 命中",
+                "🎯 105轉 → 命中",
+                "🎯 58轉 → 命中",
+                "🎯 83轉 → 命中"
             ]
-            random_hits = random.sample(fake_hits, 2)
+
+            hit_count = random.randint(1, 5)
+            random_hits = random.sample(base_hits, hit_count)
+
+            hits_html = "<br>".join(random_hits)
 
             result = f"""
             <div id="cards">
 
-                <div class="card step">
-                    🔍 正在掃描近期波動...
+                <div class="card step highlight">
+                    📊 分析結果如下
                 </div>
 
-                <div class="card step highlight">
+                <div class="card step">
                     {signal_text}
                 </div>
 
@@ -92,8 +101,7 @@ def home():
 
                 <div class="card step">
                     📈 近期命中案例：<br>
-                    {random_hits[0]}<br>
-                    {random_hits[1]}
+                    {hits_html}
                 </div>
 
                 <div class="card step small">
@@ -130,10 +138,10 @@ def home():
             font-weight:bold;
         }}
 
-        .subtitle {{
-            color:gray;
-            font-size:13px;
-            margin-bottom:20px;
+        .online {{
+            font-size:12px;
+            color:#00ffcc;
+            margin-bottom:10px;
         }}
 
         input {{
@@ -187,55 +195,15 @@ def home():
             font-size:12px;
             color:gray;
         }}
-
-        .progress {{
-            width:100%;
-            height:10px;
-            background:#222;
-            border-radius:10px;
-            overflow:hidden;
-            margin-top:20px;
-        }}
-
-        .bar {{
-            height:100%;
-            width:0%;
-            background:orange;
-            animation:load 5s linear forwards;
-        }}
-
-        @keyframes load {{
-            0% {{width:0%}}
-            100% {{width:100%}}
-        }}
     </style>
 
     <script>
         function startAnalysis(form, e) {{
             e.preventDefault();
 
-            document.getElementById("loading").style.display = "block";
-
-            let texts = [
-                "🔍 正在掃描近期波動...",
-                "📊 分析節奏變化...",
-                "🧠 建立模型中...",
-                "⚡ 捕捉關鍵訊號..."
-            ];
-
-            let i = 0;
-            let interval = setInterval(() => {{
-                if (i < texts.length) {{
-                    document.getElementById("loadingText").innerText = texts[i];
-                    i++;
-                }} else {{
-                    clearInterval(interval);
-                }}
-            }}, 1200);
-
             setTimeout(() => {{
                 form.submit();
-            }}, 5000);
+            }}, 4000);
         }}
 
         window.onload = function() {{
@@ -251,7 +219,7 @@ def home():
                         }}
                     }}
 
-                }}, i * 600);
+                }}, i * 700);
             }});
         }}
     </script>
@@ -261,7 +229,7 @@ def home():
     <body>
 
         <div class="title">⚡ 熱點雷達</div>
-        <div class="subtitle">AI節奏分析｜即時捕捉波動訊號</div>
+        <div class="online">🔥 目前線上使用：{online_users} 人</div>
 
         <form method="post" onsubmit="startAnalysis(this, event)">
             <input name="today" placeholder="今日得分率">
@@ -270,11 +238,6 @@ def home():
             <input name="last2" placeholder="上上次">
             <button>開始分析</button>
         </form>
-
-        <div id="loading" style="display:none;">
-            <div id="loadingText" style="margin-top:20px;">🔍 AI分析中...</div>
-            <div class="progress"><div class="bar"></div></div>
-        </div>
 
         <div style="display:{show_result};">
             {result}
