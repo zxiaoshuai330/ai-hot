@@ -6,8 +6,11 @@ app = Flask(__name__)
 @app.route("/", methods=["GET", "POST"])
 def home():
     result = ""
+    show_result = "none"
 
     if request.method == "POST":
+        show_result = "block"
+
         try:
             today = float(request.form["today"])
             current = int(request.form["current"])
@@ -51,25 +54,11 @@ def home():
             confidence = random.randint(72, 95)
 
             result = f"""
-            <div class="card">
-                <h2>🤖 AI評分：{score}</h2>
-            </div>
-
-            <div class="card">
-                <p>📊 節奏：{status}</p>
-                <p>🏷 狀態：{tag}</p>
-                <p>⚠️ 風險：{risk}</p>
-            </div>
-
-            <div class="card highlight">
-                <p>🎯 建議：{action}</p>
-            </div>
-
-            <div class="card">
-                <p>📈 信心指數：{confidence}%</p>
-            </div>
-
-            <div class="card small">
+            <div class="card slide">🤖 AI評分：{score}</div>
+            <div class="card slide">📊 節奏：{status}<br>🏷 狀態：{tag}<br>⚠️ 風險：{risk}</div>
+            <div class="card slide highlight">🎯 建議：{action}</div>
+            <div class="card slide">📈 信心指數：{confidence}%</div>
+            <div class="card slide small">
                 ⚠️ 熱點訊號存在時，通常不會維持太久<br>
                 💡 暫不建議重壓，可低倍觀察
             </div>
@@ -90,16 +79,19 @@ def home():
             text-align:center;
             padding:20px;
         }}
+
         .title {{
             color:orange;
-            font-size:22px;
+            font-size:24px;
             margin-bottom:5px;
         }}
+
         .subtitle {{
             color:gray;
             font-size:14px;
             margin-bottom:20px;
         }}
+
         input {{
             width:90%;
             padding:12px;
@@ -109,6 +101,7 @@ def home():
             background:#1c2233;
             color:white;
         }}
+
         button {{
             width:95%;
             padding:15px;
@@ -119,22 +112,53 @@ def home():
             color:black;
             font-size:16px;
         }}
+
         .card {{
             background:#151a2c;
             margin-top:15px;
             padding:15px;
             border-radius:15px;
+            opacity:0;
+            transform:translateY(20px);
+            animation:fadeUp 0.6s forwards;
         }}
+
+        .card:nth-child(1) {{animation-delay:0.2s}}
+        .card:nth-child(2) {{animation-delay:0.4s}}
+        .card:nth-child(3) {{animation-delay:0.6s}}
+        .card:nth-child(4) {{animation-delay:0.8s}}
+        .card:nth-child(5) {{animation-delay:1s}}
+
+        @keyframes fadeUp {{
+            to {{
+                opacity:1;
+                transform:translateY(0);
+            }}
+        }}
+
         .highlight {{
-            background:#ff8c00;
+            background:orange;
             color:black;
             font-weight:bold;
         }}
+
         .small {{
             font-size:12px;
             color:gray;
         }}
+
+        .loading {{
+            display:none;
+            margin-top:20px;
+        }}
     </style>
+
+    <script>
+        function showLoading() {{
+            document.getElementById("loading").style.display = "block";
+        }}
+    </script>
+
     </head>
 
     <body>
@@ -142,7 +166,7 @@ def home():
         <div class="title">⚡ 熱點雷達</div>
         <div class="subtitle">AI節奏分析｜捕捉爆發點</div>
 
-        <form method="post">
+        <form method="post" onsubmit="showLoading()">
             <input name="today" placeholder="今日得分率">
             <input name="current" placeholder="未開轉數">
             <input name="last1" placeholder="上次轉數">
@@ -150,7 +174,11 @@ def home():
             <button>開始分析</button>
         </form>
 
-        {result}
+        <div id="loading" class="loading">🔍 分析中...</div>
+
+        <div style="display:{show_result};">
+            {result}
+        </div>
 
     </body>
     </html>
