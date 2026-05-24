@@ -25,73 +25,132 @@ def home():
                 risk = "低風險"
 
             if current > avg * 1.3:
-                status = "觸發醞釀尾段（接近啟動）"
+                status = "觸發醞釀尾段"
                 base_score = 75
             elif current < avg * 0.7:
-                status = "釋放後整理期（節奏重建中）"
+                status = "節奏重建中"
                 base_score = 40
             else:
-                status = "節奏轉折區（訊號累積中）"
+                status = "訊號累積中"
                 base_score = 60
 
             score = base_score + (today - 100) * 0.2
             score += random.randint(-5, 5)
             score = max(0, min(100, int(score)))
 
-            center = avg - current
-            low = max(5, int(center - 10))
-            high = max(low + 5, int(center + 15))
-
             if score > 70:
                 tag = "🔥 熱點區"
-                action = "🟢 建議可提前卡位（熱點接近）"
-                strategy = "🎰 低倍進場，卡觸發點"
+                action = "建議提前卡位"
             elif score > 50:
-                tag = "⚡ 過渡熱區"
-                action = "🟡 訊號逐漸形成（可觀察）"
-                strategy = "🎯 小注測試節奏"
+                tag = "⚡ 過渡區"
+                action = "可小注測試"
             else:
-                tag = "❄️ 冷卻整理區"
-                action = "🟠 節奏整理中（觀察尾段）"
-                strategy = "💡 暫不建議重壓，可低倍觀察"
+                tag = "❄️ 冷卻區"
+                action = "低倍觀察"
 
             confidence = random.randint(72, 95)
 
             result = f"""
-            🤖 AI評分：{score}/100<br><br>
-            📊 節奏分析：{status}<br>
-            🏷 狀態區間：{tag}<br>
-            ⚠️ 風險等級：{risk}<br><br>
-            {action}<br>
-            {strategy}<br><br>
-            ⏳ 預測觸發：約 {low} ~ {high} 轉<br><br>
-            📈 信心指數：{confidence}%<br><br>
-            ⚠️ 熱點訊號存在時，通常不會維持太久<br>
-            💡 暫不建議重壓，可低倍觀察
+            <div class="card">
+                <h2>🤖 AI評分：{score}</h2>
+            </div>
+
+            <div class="card">
+                <p>📊 節奏：{status}</p>
+                <p>🏷 狀態：{tag}</p>
+                <p>⚠️ 風險：{risk}</p>
+            </div>
+
+            <div class="card highlight">
+                <p>🎯 建議：{action}</p>
+            </div>
+
+            <div class="card">
+                <p>📈 信心指數：{confidence}%</p>
+            </div>
+
+            <div class="card small">
+                ⚠️ 熱點訊號存在時，通常不會維持太久<br>
+                💡 暫不建議重壓，可低倍觀察
+            </div>
             """
 
         except:
-            result = "⚠️ 請輸入正確數字"
+            result = "<div class='card'>⚠️ 請輸入正確數字</div>"
 
     return f"""
     <html>
-    <body style="background:#0b0f1a;color:white;text-align:center;font-family:sans-serif;">
-        
-        <h2 style="color:orange;">⚡ 熱點雷達</h2>
-        <p style="color:gray;">即時節奏分析｜捕捉潛在爆發點</p>
+    <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {{
+            background:#0b0f1a;
+            color:white;
+            font-family:sans-serif;
+            text-align:center;
+            padding:20px;
+        }}
+        .title {{
+            color:orange;
+            font-size:22px;
+            margin-bottom:5px;
+        }}
+        .subtitle {{
+            color:gray;
+            font-size:14px;
+            margin-bottom:20px;
+        }}
+        input {{
+            width:90%;
+            padding:12px;
+            margin:8px 0;
+            border-radius:10px;
+            border:none;
+            background:#1c2233;
+            color:white;
+        }}
+        button {{
+            width:95%;
+            padding:15px;
+            margin-top:15px;
+            border:none;
+            border-radius:12px;
+            background:orange;
+            color:black;
+            font-size:16px;
+        }}
+        .card {{
+            background:#151a2c;
+            margin-top:15px;
+            padding:15px;
+            border-radius:15px;
+        }}
+        .highlight {{
+            background:#ff8c00;
+            color:black;
+            font-weight:bold;
+        }}
+        .small {{
+            font-size:12px;
+            color:gray;
+        }}
+    </style>
+    </head>
+
+    <body>
+
+        <div class="title">⚡ 熱點雷達</div>
+        <div class="subtitle">AI節奏分析｜捕捉爆發點</div>
 
         <form method="post">
-            今日得分率:<br><input name="today"><br><br>
-            未開轉數:<br><input name="current"><br><br>
-            上次轉數:<br><input name="last1"><br><br>
-            上上次:<br><input name="last2"><br><br>
-
-            <button style="padding:10px 20px;background:orange;border:none;">開始分析</button>
+            <input name="today" placeholder="今日得分率">
+            <input name="current" placeholder="未開轉數">
+            <input name="last1" placeholder="上次轉數">
+            <input name="last2" placeholder="上上次">
+            <button>開始分析</button>
         </form>
 
-        <div style="margin-top:20px;">
-            {result}
-        </div>
+        {result}
 
     </body>
     </html>
