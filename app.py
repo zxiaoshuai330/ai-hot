@@ -1,5 +1,6 @@
 from flask import Flask, request
 import random
+import os
 
 app = Flask(__name__)
 
@@ -54,18 +55,20 @@ def home():
             confidence = random.randint(75, 96)
 
             result = f"""
-            <div class="card slide">🤖 AI評分：{score}</div>
-            <div class="card slide">📊 節奏：{status}<br>🏷 狀態：{tag}<br>⚠️ 風險：{risk}</div>
-            <div class="card slide highlight">🎯 建議：{action}</div>
-            <div class="card slide">📈 信心指數：{confidence}%</div>
+            <div id="cards" style="display:none;">
+                <div class="card">🤖 AI評分：{score}</div>
+                <div class="card">📊 節奏：{status}<br>🏷 狀態：{tag}<br>⚠️ 風險：{risk}</div>
+                <div class="card highlight">🎯 建議：{action}</div>
+                <div class="card">📈 信心指數：{confidence}%</div>
 
-            <div class="card slide small">
-                ⚠️ 熱點訊號存在時，通常不會維持太久<br>
-                💡 暫不建議重壓，可低倍觀察
-            </div>
+                <div class="card small">
+                    ⚠️ 熱點訊號存在時，通常不會維持太久<br>
+                    💡 暫不建議重壓，可低倍觀察
+                </div>
 
-            <div class="card slide small">
-                ※ 本系統為AI模型推估，結果僅供參考
+                <div class="card small">
+                    ※ 本系統為AI模型推估，結果僅供參考
+                </div>
             </div>
             """
 
@@ -128,11 +131,11 @@ def home():
         }}
 
         .card:nth-child(1) {{animation-delay:0.3s}}
-        .card:nth-child(2) {{animation-delay:0.6s}}
-        .card:nth-child(3) {{animation-delay:0.9s}}
-        .card:nth-child(4) {{animation-delay:1.2s}}
-        .card:nth-child(5) {{animation-delay:1.5s}}
-        .card:nth-child(6) {{animation-delay:1.8s}}
+        .card:nth-child(2) {{animation-delay:0.8s}}
+        .card:nth-child(3) {{animation-delay:1.3s}}
+        .card:nth-child(4) {{animation-delay:1.8s}}
+        .card:nth-child(5) {{animation-delay:2.3s}}
+        .card:nth-child(6) {{animation-delay:2.8s}}
 
         @keyframes fadeUp {{
             to {{
@@ -154,7 +157,7 @@ def home():
 
         .progress {{
             width:100%;
-            height:8px;
+            height:10px;
             background:#222;
             border-radius:10px;
             overflow:hidden;
@@ -165,17 +168,39 @@ def home():
             height:100%;
             width:0%;
             background:orange;
-            animation:load 2s forwards;
+            animation:load 4s linear forwards;
         }}
 
         @keyframes load {{
-            to {{ width:100%; }}
+            0% {{width:0%}}
+            100% {{width:100%}}
         }}
     </style>
 
     <script>
         function showLoading() {{
             document.getElementById("loading").style.display = "block";
+
+            let texts = [
+                "🔍 掃描近期節奏...",
+                "📊 建立波動模型...",
+                "🧠 AI計算中...",
+                "⚡ 捕捉熱點訊號..."
+            ];
+
+            let i = 0;
+            let interval = setInterval(() => {{
+                if (i < texts.length) {{
+                    document.getElementById("loadingText").innerText = texts[i];
+                    i++;
+                }} else {{
+                    clearInterval(interval);
+                }}
+            }}, 1000);
+
+            setTimeout(() => {{
+                document.getElementById("cards").style.display = "block";
+            }}, 4000);
         }}
     </script>
 
@@ -195,7 +220,7 @@ def home():
         </form>
 
         <div id="loading" style="display:none;">
-            <div style="margin-top:20px;">🔍 AI分析中...</div>
+            <div id="loadingText" style="margin-top:20px;">🔍 AI分析中...</div>
             <div class="progress"><div class="bar"></div></div>
         </div>
 
@@ -207,6 +232,5 @@ def home():
     </html>
     """
 
-import os
 port = int(os.environ.get("PORT", 10000))
 app.run(host="0.0.0.0", port=port)
