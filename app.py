@@ -14,6 +14,9 @@ def home():
     last1_val = ""
     last2_val = ""
 
+    # 👉 IG連結
+    ig_link = "https://www.instagram.com/gambler_168"
+
     if request.method == "POST":
         show_result = "block"
 
@@ -30,7 +33,6 @@ def home():
             avg = (last1 + last2) / 2
             diff = abs(last1 - last2)
 
-            # 波動
             if diff > 80:
                 risk = "高波動（節奏不穩）"
             elif diff > 30:
@@ -38,46 +40,39 @@ def home():
             else:
                 risk = "穩定節奏"
 
-            # 🔥 訊號生成（無符號版本）
+            # 訊號（只有前面顯示用）
             def gen_signal():
                 mode = random.choice(["球", "免"])
                 count = random.randint(1, 2)
 
                 if mode == "球":
                     num = random.randint(1, 6)
-                    return f"訊號：{count}個{mode} + {num}個相同大圖"
+                    return f"{count}個{mode} + {num}個相同大圖"
                 else:
                     seq = random.choice(["123","234","345","456","567"])
-                    return f"訊號：{count}個{mode} + {seq}順序大圖"
+                    return f"{count}個{mode} + {seq}順序大圖"
 
             signal_extra = gen_signal()
 
-            # 🎯 操作邏輯
             if current > avg * 1.3:
                 status = "進入尾段醞釀"
-                action = "建議低本測試"
-                range_text = f"{int(avg*0.8)}～{int(avg*1.2)} 轉"
-                show_signal = True
-
             elif current < avg * 0.7:
                 status = "剛結束釋放"
-                action = "不建議進場"
-                range_text = f"建議等待累積至 {int(avg)} 轉以上"
-                show_signal = False
-
             else:
                 status = "訊號累積中"
-                action = "購買免費遊戲"
-                range_text = f"{int(avg*0.6)}～{int(avg*0.9)} 轉"
-                show_signal = True
 
-            confidence = random.randint(80, 96)
             signal_chance = random.randint(60, 95)
-
             signal_text = f"✅ 成功捕捉熱點訊號（{signal_chance}%）" if signal_chance > 75 else f"⚠️ 訊號偏弱（{signal_chance}%）"
 
-            # 🔥 只在指定情況加訊號
-            extra_block = f"<br>{signal_extra}" if show_signal else ""
+            # 🔒 鎖區塊（點擊跳IG）
+            def lock_block(text):
+                return f'''
+                <div onclick="window.location.href='{ig_link}'"
+                     style="background:#222;padding:15px;border-radius:15px;margin-top:15px;">
+                    🔒 {text}<br>
+                    <span style="color:orange;">點擊前往 IG 解鎖</span>
+                </div>
+                '''
 
             result = f"""
             <div id="cards">
@@ -95,18 +90,9 @@ def home():
                     ⚠️ 波動狀態：{risk}
                 </div>
 
-                <div class="card step highlight">
-                    🎯 操作建議：{action}
-                    {extra_block}
-                </div>
+                {lock_block("操作建議已鎖定")}
 
-                <div class="card step">
-                    ⏱ 建議區間：{range_text}
-                </div>
-
-                <div class="card step">
-                    🤖 AI信心指數：{confidence}%
-                </div>
+                {lock_block("建議區間已鎖定")}
 
                 <div class="card step small">
                     ⚠️ 熱點訊號通常不會維持太久<br>
@@ -181,12 +167,6 @@ def home():
             to {{ opacity:1; transform:translateY(0); }}
         }}
 
-        .highlight {{
-            background:orange;
-            color:black;
-            font-weight:bold;
-        }}
-
         .red {{
             background:#ff3b3b;
             color:white;
@@ -202,7 +182,7 @@ def home():
     <script>
         function startAnalysis(form, e) {{
             e.preventDefault();
-            setTimeout(() => form.submit(), 4000);
+            setTimeout(() => form.submit(), 3000);
         }}
 
         window.onload = function() {{
@@ -217,7 +197,7 @@ def home():
                             navigator.vibrate([120,60,120]);
                         }}
                     }}
-                }}, i * 700);
+                }}, i * 600);
             }});
         }}
     </script>
