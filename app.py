@@ -15,11 +15,6 @@ def home():
     last1_val = ""
     last2_val = ""
 
-    # 🔥 線上人數（每3分鐘變動）
-    seed = int(time.time() // 180)
-    random.seed(seed)
-    online_users = random.randint(3, 57)
-
     if request.method == "POST":
         show_result = "block"
 
@@ -29,7 +24,6 @@ def home():
         last2_val = request.form["last2"]
 
         try:
-            today = float(today_val)
             current = int(current_val)
             last1 = int(last1_val)
             last2 = int(last2_val)
@@ -45,24 +39,45 @@ def home():
             else:
                 risk = "穩定節奏"
 
-            # 🎯 操作建議（你指定的三種）
+            # 🔥 訊號生成
+            def gen_signal():
+                mode = random.choice(["ball", "b"])
+                count = random.randint(1, 2)
+
+                if mode == "ball":
+                    num = random.randint(1, 6)
+                    return f"訊號部分：({count})球 + {{{num}}} 個相同大圖"
+                else:
+                    seq = random.choice(["123","234","345","456","567"])
+                    return f"訊號部分：({count})b + [{seq}] 順序大圖"
+
+            signal_extra = gen_signal()
+
+            # 🎯 操作邏輯
             if current > avg * 1.3:
                 status = "進入尾段醞釀"
                 action = "建議低本測試"
-                range_text = f"觀察區：約 {int(avg*0.8)}～{int(avg*1.2)} 轉"
+                range_text = f"{int(avg*0.8)}～{int(avg*1.2)} 轉"
+
             elif current < avg * 0.7:
                 status = "剛結束釋放"
                 action = "不建議進場"
                 range_text = f"建議等待累積至 {int(avg)} 轉以上"
+
             else:
                 status = "訊號累積中"
                 action = "購買免費遊戲"
-                range_text = f"測試區：約 {int(avg*0.6)}～{int(avg*0.9)} 轉"
+                range_text = f"{int(avg*0.6)}～{int(avg*0.9)} 轉"
 
             confidence = random.randint(80, 96)
             signal_chance = random.randint(60, 95)
 
-            signal_text = f"✅ 成功捕捉熱點訊號（機率 {signal_chance}%）" if signal_chance > 75 else f"⚠️ 訊號偏弱（{signal_chance}%）"
+            signal_text = f"✅ 成功捕捉熱點訊號（{signal_chance}%）" if signal_chance > 75 else f"⚠️ 訊號偏弱（{signal_chance}%）"
+
+            # 🔥 組結果
+            extra_block = ""
+            if action == "購買免費遊戲":
+                extra_block = f"<br>{signal_extra}"
 
             result = f"""
             <div id="cards">
@@ -82,10 +97,12 @@ def home():
 
                 <div class="card step highlight">
                     🎯 操作建議：{action}
+                    {extra_block}
                 </div>
 
                 <div class="card step">
-                    ⏱ 參考區間：{range_text}
+                    ⏱ 建議區間：{range_text}<br>
+                    {signal_extra}
                 </div>
 
                 <div class="card step">
@@ -95,10 +112,6 @@ def home():
                 <div class="card step small">
                     ⚠️ 熱點訊號通常不會維持太久<br>
                     💡 建議低倍觀察，避免重壓
-                </div>
-
-                <div class="card step small">
-                    ※ 本系統為AI模型推估，結果僅供參考
                 </div>
 
             </div>
@@ -126,9 +139,10 @@ def home():
             font-weight:bold;
         }}
 
-        .online {{
+        .subnote {{
             font-size:12px;
-            color:#00ffcc;
+            color:gray;
+            margin-bottom:10px;
         }}
 
         input {{
@@ -214,7 +228,7 @@ def home():
     <body>
 
         <div class="title">⚡ 熱點雷達</div>
-        <div class="online">🔥 線上使用：{online_users} 人</div>
+        <div class="subnote">※ 本系統為AI模型推估，結果僅供參考</div>
 
         <form method="post" onsubmit="startAnalysis(this, event)">
             <input name="today" placeholder="今日得分率" value="{today_val}">
