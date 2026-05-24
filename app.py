@@ -15,10 +15,10 @@ def home():
     last1_val = ""
     last2_val = ""
 
-    # 🔥 假在線人數
-    seed = int(time.time() // 1800)
+    # 🔥 線上人數（每3分鐘變動）
+    seed = int(time.time() // 180)
     random.seed(seed)
-    online_users = random.randint(0, 57)
+    online_users = random.randint(3, 57)
 
     if request.method == "POST":
         show_result = "block"
@@ -62,7 +62,6 @@ def home():
 
             signal_text = f"✅ 成功捕捉熱點訊號（機率 {signal_chance}%）" if signal_chance > 75 else f"⚠️ 訊號偏弱（{signal_chance}%）"
 
-            # 🎯 命中案例
             base_hits = ["48轉","63轉","72轉","91轉","105轉","58轉","83轉"]
             hit_count = random.randint(1, 5)
             hits = "<br>".join([f"🎯 {x} → 命中" for x in random.sample(base_hits, hit_count)])
@@ -114,11 +113,6 @@ def home():
         except:
             result = "<div class='card'>⚠️ 輸入錯誤</div>"
 
-    # 🔥 跑馬燈資料
-    names = ["玩家A","玩家B","玩家C","玩家D","玩家E"]
-    amounts = [1200, 2500, 3800, 5200, 8800, 12000]
-    ticker = "　　".join([f"{random.choice(names)} 剛剛命中 +{random.choice(amounts)}" for _ in range(5)])
-
     return f"""
     <html>
     <head>
@@ -141,25 +135,6 @@ def home():
         .online {{
             font-size:12px;
             color:#00ffcc;
-        }}
-
-        .ticker {{
-            overflow:hidden;
-            white-space:nowrap;
-            box-sizing:border-box;
-            margin:10px 0;
-            color:#00ffaa;
-        }}
-
-        .ticker span {{
-            display:inline-block;
-            padding-left:100%;
-            animation:scroll 12s linear infinite;
-        }}
-
-        @keyframes scroll {{
-            0% {{ transform:translateX(0); }}
-            100% {{ transform:translateX(-100%); }}
         }}
 
         input {{
@@ -246,8 +221,6 @@ def home():
 
         <div class="title">⚡ 熱點雷達</div>
         <div class="online">🔥 線上使用：{online_users} 人</div>
-
-        <div class="ticker"><span>{ticker}</span></div>
 
         <form method="post" onsubmit="startAnalysis(this, event)">
             <input name="today" placeholder="今日得分率" value="{today_val}">
