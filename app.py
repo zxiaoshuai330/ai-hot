@@ -10,7 +10,12 @@ def home():
     result = ""
     show_result = "none"
 
-    # 🔥 假在線人數（每30分鐘變）
+    today_val = ""
+    current_val = ""
+    last1_val = ""
+    last2_val = ""
+
+    # 🔥 假在線人數
     seed = int(time.time() // 1800)
     random.seed(seed)
     online_users = random.randint(0, 57)
@@ -18,11 +23,16 @@ def home():
     if request.method == "POST":
         show_result = "block"
 
+        today_val = request.form["today"]
+        current_val = request.form["current"]
+        last1_val = request.form["last1"]
+        last2_val = request.form["last2"]
+
         try:
-            today = float(request.form["today"])
-            current = int(request.form["current"])
-            last1 = int(request.form["last1"])
-            last2 = int(request.form["last2"])
+            today = float(today_val)
+            current = int(current_val)
+            last1 = int(last1_val)
+            last2 = int(last2_val)
 
             avg = (last1 + last2) / 2
             diff = abs(last1 - last2)
@@ -50,31 +60,17 @@ def home():
             confidence = random.randint(80, 96)
             signal_chance = random.randint(60, 95)
 
-            if signal_chance > 75:
-                signal_text = f"✅ 成功捕捉熱點訊號（機率 {signal_chance}%）"
-            else:
-                signal_text = f"⚠️ 訊號偏弱（目前機率 {signal_chance}%）"
+            signal_text = f"✅ 成功捕捉熱點訊號（機率 {signal_chance}%）" if signal_chance > 75 else f"⚠️ 訊號偏弱（{signal_chance}%）"
 
-            # 🔥 命中案例（隨機1~5筆）
-            base_hits = [
-                "🎯 48轉 → 命中",
-                "🎯 63轉 → 命中",
-                "🎯 72轉 → 命中",
-                "🎯 91轉 → 命中",
-                "🎯 105轉 → 命中",
-                "🎯 58轉 → 命中",
-                "🎯 83轉 → 命中"
-            ]
-
+            # 🎯 命中案例
+            base_hits = ["48轉","63轉","72轉","91轉","105轉","58轉","83轉"]
             hit_count = random.randint(1, 5)
-            random_hits = random.sample(base_hits, hit_count)
-
-            hits_html = "<br>".join(random_hits)
+            hits = "<br>".join([f"🎯 {x} → 命中" for x in random.sample(base_hits, hit_count)])
 
             result = f"""
             <div id="cards">
 
-                <div class="card step highlight">
+                <div class="card step red">
                     📊 分析結果如下
                 </div>
 
@@ -100,12 +96,11 @@ def home():
                 </div>
 
                 <div class="card step">
-                    📈 近期命中案例：<br>
-                    {hits_html}
+                    📈 近期命中案例：<br>{hits}
                 </div>
 
                 <div class="card step small">
-                    ⚠️ 熱點訊號存在時通常不會維持太久<br>
+                    ⚠️ 熱點訊號通常不會維持太久<br>
                     💡 建議低倍觀察，避免重壓
                 </div>
 
@@ -117,7 +112,12 @@ def home():
             """
 
         except:
-            result = "<div class='card'>⚠️ 請輸入正確數字</div>"
+            result = "<div class='card'>⚠️ 輸入錯誤</div>"
+
+    # 🔥 跑馬燈資料
+    names = ["玩家A","玩家B","玩家C","玩家D","玩家E"]
+    amounts = [1200, 2500, 3800, 5200, 8800, 12000]
+    ticker = "　　".join([f"{random.choice(names)} 剛剛命中 +{random.choice(amounts)}" for _ in range(5)])
 
     return f"""
     <html>
@@ -141,7 +141,25 @@ def home():
         .online {{
             font-size:12px;
             color:#00ffcc;
-            margin-bottom:10px;
+        }}
+
+        .ticker {{
+            overflow:hidden;
+            white-space:nowrap;
+            box-sizing:border-box;
+            margin:10px 0;
+            color:#00ffaa;
+        }}
+
+        .ticker span {{
+            display:inline-block;
+            padding-left:100%;
+            animation:scroll 12s linear infinite;
+        }}
+
+        @keyframes scroll {{
+            0% {{ transform:translateX(0); }}
+            100% {{ transform:translateX(-100%); }}
         }}
 
         input {{
@@ -162,7 +180,6 @@ def home():
             border-radius:12px;
             background:orange;
             color:black;
-            font-size:16px;
         }}
 
         .card {{
@@ -179,15 +196,18 @@ def home():
         }}
 
         @keyframes fadeUp {{
-            to {{
-                opacity:1;
-                transform:translateY(0);
-            }}
+            to {{ opacity:1; transform:translateY(0); }}
         }}
 
         .highlight {{
             background:orange;
             color:black;
+            font-weight:bold;
+        }}
+
+        .red {{
+            background:#ff3b3b;
+            color:white;
             font-weight:bold;
         }}
 
@@ -200,10 +220,7 @@ def home():
     <script>
         function startAnalysis(form, e) {{
             e.preventDefault();
-
-            setTimeout(() => {{
-                form.submit();
-            }}, 4000);
+            setTimeout(() => form.submit(), 4000);
         }}
 
         window.onload = function() {{
@@ -215,10 +232,9 @@ def home():
 
                     if (i === steps.length - 1) {{
                         if (navigator.vibrate) {{
-                            navigator.vibrate([120, 60, 120]);
+                            navigator.vibrate([120,60,120]);
                         }}
                     }}
-
                 }}, i * 700);
             }});
         }}
@@ -229,13 +245,15 @@ def home():
     <body>
 
         <div class="title">⚡ 熱點雷達</div>
-        <div class="online">🔥 目前線上使用：{online_users} 人</div>
+        <div class="online">🔥 線上使用：{online_users} 人</div>
+
+        <div class="ticker"><span>{ticker}</span></div>
 
         <form method="post" onsubmit="startAnalysis(this, event)">
-            <input name="today" placeholder="今日得分率">
-            <input name="current" placeholder="未開轉數">
-            <input name="last1" placeholder="上次轉數">
-            <input name="last2" placeholder="上上次">
+            <input name="today" placeholder="今日得分率" value="{today_val}">
+            <input name="current" placeholder="未開轉數" value="{current_val}">
+            <input name="last1" placeholder="上次轉數" value="{last1_val}">
+            <input name="last2" placeholder="上上次" value="{last2_val}">
             <button>開始分析</button>
         </form>
 
