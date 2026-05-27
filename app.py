@@ -27,9 +27,12 @@ def home():
     current_val = ""
     last1_val = ""
     last2_val = ""
+    game_val = ""   # ✅ 新增
 
     if request.method == "POST":
         show_result = "block"
+
+        game_val = request.form.get("game", "")  # ✅ 新增
         today_val = request.form["today"]
         current_val = request.form["current"]
         last1_val = request.form["last1"]
@@ -90,23 +93,33 @@ def home():
                 <div class="card step red">
                     📊 分析結果如下
                 </div>
+
+                <div class="card step">
+                    🎮 遊戲：{game_val}
+                </div>
+
                 <div class="card step">
                     {signal_text}
                 </div>
+
                 <div class="card step">
                     📊 節奏判定：{status}<br>
                     ⚠️ 波動狀態：{risk}
                 </div>
+
                 <div class="card step highlight">
                     🎯 操作建議：{action}
                     {extra_block}
                 </div>
+
                 <div class="card step">
                     ⏱ 建議區間：{range_text}
                 </div>
+
                 <div class="card step">
                     🤖 AI信心指數：{confidence}%
                 </div>
+
                 <div class="card step small">
                     ⚠️ 熱點訊號通常不會維持太久<br>
                     💡 建議低倍觀察，避免重壓
@@ -139,7 +152,7 @@ def home():
             color:gray;
             margin-bottom:10px;
         }}
-        input {{
+        input, select {{
             width:90%;
             padding:12px;
             margin:8px 0;
@@ -186,11 +199,13 @@ def home():
             color:gray;
         }}
     </style>
+
     <script>
         function startAnalysis(form, e) {{
             e.preventDefault();
             setTimeout(() => form.submit(), 4000);
         }}
+
         window.onload = function() {{
             let steps = document.querySelectorAll(".step");
             steps.forEach((el, i) => {{
@@ -200,20 +215,35 @@ def home():
             }});
         }}
     </script>
+
     </head>
+
     <body>
+
         <div class="title">⚡ 熱點雷達</div>
         <div class="subnote">※ 本系統為AI模型推估，結果僅供參考</div>
+
         <form method="post" onsubmit="startAnalysis(this, event)">
+
+            <select name="game">
+                <option value="">選擇遊戲</option>
+                <option value="賽特" {"selected" if game_val=="賽特" else ""}>賽特</option>
+                <option value="赤三國" {"selected" if game_val=="赤三國" else ""}>赤三國</option>
+            </select>
+
             <input name="today" placeholder="今日得分率" value="{today_val}">
             <input name="current" placeholder="未開轉數" value="{current_val}">
             <input name="last1" placeholder="上次轉數" value="{last1_val}">
             <input name="last2" placeholder="上上次" value="{last2_val}">
+
             <button>開始分析</button>
+
         </form>
+
         <div style="display:{show_result};">
             {result}
         </div>
+
     </body>
     </html>
     """
