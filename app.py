@@ -1,8 +1,23 @@
 from flask import Flask, request
 import random
 import os
+import threading
+import time
+import requests
 
 app = Flask(__name__)
+
+# 🔥 Render 自ping（輔助防睡）
+def keep_alive():
+    while True:
+        try:
+            requests.get("https://ai-hot-vip.onrender.com")
+            print("ping ok")
+        except:
+            print("ping fail")
+        time.sleep(300)  # 每5分鐘
+
+threading.Thread(target=keep_alive).start()
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -12,11 +27,9 @@ def home():
     current_val = ""
     last1_val = ""
     last2_val = ""
-    game_val = ""
 
     if request.method == "POST":
         show_result = "block"
-        game_val = request.form.get("game", "")
         today_val = request.form["today"]
         current_val = request.form["current"]
         last1_val = request.form["last1"]
@@ -38,7 +51,7 @@ def home():
             else:
                 risk = "穩定節奏"
 
-            # 🔥 訊號生成
+            # 訊號
             def gen_signal():
                 mode = random.choice(["球", "免"])
                 count = random.randint(1, 2)
@@ -51,7 +64,7 @@ def home():
 
             signal_extra = gen_signal()
 
-            # 🎯 操作邏輯
+            # 邏輯
             if current > avg * 1.3:
                 status = "進入尾段醞釀"
                 action = "建議低本測試"
@@ -79,10 +92,6 @@ def home():
             <div id="cards">
                 <div class="card step red">
                     📊 分析結果如下
-                </div>
-
-                <div class="card step">
-                    🎮 選擇遊戲：{game_val}
                 </div>
 
                 <div class="card step">
@@ -121,127 +130,122 @@ def home():
     <html>
     <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
-        body {{
-            background:#0b0f1a;
-            color:white;
-            font-family:sans-serif;
-            text-align:center;
-            padding:20px;
-        }}
+    body {{
+        background:#0b0f1a;
+        color:white;
+        font-family:sans-serif;
+        text-align:center;
+        padding:20px;
+    }}
 
-        .title {{
-            color:orange;
-            font-size:26px;
-            font-weight:bold;
-        }}
+    .title {{
+        color:orange;
+        font-size:26px;
+        font-weight:bold;
+    }}
 
-        .subnote {{
-            font-size:12px;
-            color:gray;
-            margin-bottom:10px;
-        }}
+    .subnote {{
+        font-size:12px;
+        color:gray;
+        margin-bottom:10px;
+    }}
 
-        input, select {{
-            width:90%;
-            padding:12px;
-            margin:8px 0;
-            border-radius:10px;
-            border:none;
-            background:#1c2233;
-            color:white;
-        }}
+    input {{
+        width:90%;
+        padding:12px;
+        margin:8px 0;
+        border-radius:10px;
+        border:none;
+        background:#1c2233;
+        color:white;
+    }}
 
-        button {{
-            width:95%;
-            padding:15px;
-            margin-top:15px;
-            border:none;
-            border-radius:12px;
-            background:orange;
-            color:black;
-        }}
+    button {{
+        width:95%;
+        padding:15px;
+        margin-top:15px;
+        border:none;
+        border-radius:12px;
+        background:orange;
+        color:black;
+    }}
 
-        .card {{
-            background:#151a2c;
-            margin-top:15px;
-            padding:15px;
-            border-radius:15px;
-            opacity:0;
-            transform:translateY(30px);
-        }}
+    .card {{
+        background:#151a2c;
+        margin-top:15px;
+        padding:15px;
+        border-radius:15px;
+        opacity:0;
+        transform:translateY(30px);
+    }}
 
-        .show {{
-            animation:fadeUp 0.5s forwards;
-        }}
+    .show {{
+        animation:fadeUp 0.5s forwards;
+    }}
 
-        @keyframes fadeUp {{
-            to {{ opacity:1; transform:translateY(0); }}
-        }}
+    @keyframes fadeUp {{
+        to {{ opacity:1; transform:translateY(0); }}
+    }}
 
-        .highlight {{
-            background:orange;
-            color:black;
-            font-weight:bold;
-        }}
+    .highlight {{
+        background:orange;
+        color:black;
+        font-weight:bold;
+    }}
 
-        .red {{
-            background:#ff3b3b;
-            color:white;
-            font-weight:bold;
-        }}
+    .red {{
+        background:#ff3b3b;
+        color:white;
+        font-weight:bold;
+    }}
 
-        .small {{
-            font-size:12px;
-            color:gray;
-        }}
+    .small {{
+        font-size:12px;
+        color:gray;
+    }}
     </style>
 
     <script>
-        function startAnalysis(form, e) {{
-            e.preventDefault();
-            setTimeout(() => form.submit(), 4000);
-        }}
+    function startAnalysis(form, e) {{
+        e.preventDefault();
+        setTimeout(() => form.submit(), 4000);
+    }}
 
-        window.onload = function() {{
-            let steps = document.querySelectorAll(".step");
-            steps.forEach((el, i) => {{
-                setTimeout(() => {{
-                    el.classList.add("show");
-                    if (i === steps.length - 1) {{
-                        if (navigator.vibrate) {{
-                            navigator.vibrate([120,60,120]);
-                        }}
+    window.onload = function() {{
+        let steps = document.querySelectorAll(".step");
+        steps.forEach((el, i) => {{
+            setTimeout(() => {{
+                el.classList.add("show");
+                if (i === steps.length - 1) {{
+                    if (navigator.vibrate) {{
+                        navigator.vibrate([120,60,120]);
                     }}
-                }}, i * 700);
-            }});
-        }}
+                }}
+            }}, i * 700);
+        }});
+    }}
     </script>
+
     </head>
 
     <body>
-        <div class="title">⚡ 熱點雷達</div>
-        <div class="subnote">※ 本系統為AI模型推估，結果僅供參考</div>
 
-        <form method="post" onsubmit="startAnalysis(this, event)">
+    <div class="title">⚡ 熱點雷達</div>
+    <div class="subnote">※ 本系統為AI模型推估，結果僅供參考</div>
 
-            <select name="game">
-                <option value="">選擇遊戲</option>
-                <option value="賽特" {"selected" if game_val=="賽特" else ""}>賽特</option>
-                <option value="赤三國" {"selected" if game_val=="赤三國" else ""}>赤三國</option>
-            </select>
+    <form method="post" onsubmit="startAnalysis(this, event)">
+        <input name="today" placeholder="今日得分率" value="{today_val}">
+        <input name="current" placeholder="未開轉數" value="{current_val}">
+        <input name="last1" placeholder="上次轉數" value="{last1_val}">
+        <input name="last2" placeholder="上上次" value="{last2_val}">
+        <button>開始分析</button>
+    </form>
 
-            <input name="today" placeholder="今日得分率" value="{today_val}">
-            <input name="current" placeholder="未開轉數" value="{current_val}">
-            <input name="last1" placeholder="上次轉數" value="{last1_val}">
-            <input name="last2" placeholder="上上次" value="{last2_val}">
-
-            <button>開始分析</button>
-        </form>
-
-        <div style="display:{show_result};">
-            {result}
-        </div>
+    <div style="display:{show_result};">
+        {result}
+    </div>
 
     </body>
     </html>
