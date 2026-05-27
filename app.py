@@ -8,15 +8,15 @@ app = Flask(__name__)
 def home():
     result = ""
     show_result = "none"
-
     today_val = ""
     current_val = ""
     last1_val = ""
     last2_val = ""
+    game_val = ""
 
     if request.method == "POST":
         show_result = "block"
-
+        game_val = request.form.get("game", "")
         today_val = request.form["today"]
         current_val = request.form["current"]
         last1_val = request.form["last1"]
@@ -38,11 +38,10 @@ def home():
             else:
                 risk = "穩定節奏"
 
-            # 🔥 訊號生成（無符號版本）
+            # 🔥 訊號生成
             def gen_signal():
                 mode = random.choice(["球", "免"])
                 count = random.randint(1, 2)
-
                 if mode == "球":
                     num = random.randint(1, 6)
                     return f"訊號：{count}個{mode} + {num}個相同大圖"
@@ -58,13 +57,11 @@ def home():
                 action = "建議低本測試"
                 range_text = f"{int(avg*0.8)}～{int(avg*1.2)} 轉"
                 show_signal = True
-
             elif current < avg * 0.7:
                 status = "剛結束釋放"
                 action = "不建議進場"
                 range_text = f"建議等待累積至 {int(avg)} 轉以上"
                 show_signal = False
-
             else:
                 status = "訊號累積中"
                 action = "購買免費遊戲"
@@ -76,14 +73,16 @@ def home():
 
             signal_text = f"✅ 成功捕捉熱點訊號（{signal_chance}%）" if signal_chance > 75 else f"⚠️ 訊號偏弱（{signal_chance}%）"
 
-            # 🔥 只在指定情況加訊號
             extra_block = f"<br>{signal_extra}" if show_signal else ""
 
             result = f"""
             <div id="cards">
-
                 <div class="card step red">
                     📊 分析結果如下
+                </div>
+
+                <div class="card step">
+                    🎮 選擇遊戲：{game_val}
                 </div>
 
                 <div class="card step">
@@ -112,7 +111,6 @@ def home():
                     ⚠️ 熱點訊號通常不會維持太久<br>
                     💡 建議低倍觀察，避免重壓
                 </div>
-
             </div>
             """
 
@@ -144,7 +142,7 @@ def home():
             margin-bottom:10px;
         }}
 
-        input {{
+        input, select {{
             width:90%;
             padding:12px;
             margin:8px 0;
@@ -207,11 +205,9 @@ def home():
 
         window.onload = function() {{
             let steps = document.querySelectorAll(".step");
-
             steps.forEach((el, i) => {{
                 setTimeout(() => {{
                     el.classList.add("show");
-
                     if (i === steps.length - 1) {{
                         if (navigator.vibrate) {{
                             navigator.vibrate([120,60,120]);
@@ -221,19 +217,25 @@ def home():
             }});
         }}
     </script>
-
     </head>
 
     <body>
-
         <div class="title">⚡ 熱點雷達</div>
         <div class="subnote">※ 本系統為AI模型推估，結果僅供參考</div>
 
         <form method="post" onsubmit="startAnalysis(this, event)">
+
+            <select name="game">
+                <option value="">選擇遊戲</option>
+                <option value="賽特" {"selected" if game_val=="賽特" else ""}>賽特</option>
+                <option value="赤三國" {"selected" if game_val=="赤三國" else ""}>赤三國</option>
+            </select>
+
             <input name="today" placeholder="今日得分率" value="{today_val}">
             <input name="current" placeholder="未開轉數" value="{current_val}">
             <input name="last1" placeholder="上次轉數" value="{last1_val}">
             <input name="last2" placeholder="上上次" value="{last2_val}">
+
             <button>開始分析</button>
         </form>
 
